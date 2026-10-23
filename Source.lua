@@ -48,7 +48,7 @@ local allowedCategories = {
 }
 
 ----------------------------------------------------
--- UI CREATION
+-- UI CREATION (Optimized: No Export Boxes)
 ----------------------------------------------------
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "LuaRoomExporterGui"
@@ -57,8 +57,8 @@ screenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
 local frame = Instance.new("Frame")
 frame.Name = "MainFrame"
-frame.Size = UDim2.new(0, 240, 0, 560)
-frame.Position = UDim2.new(0, 20, 0.5, -280)
+frame.Size = UDim2.new(0, 240, 0, 500)
+frame.Position = UDim2.new(0, 20, 0.5, -250)
 frame.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
 frame.BorderSizePixel = 0
 frame.Parent = screenGui
@@ -108,7 +108,7 @@ contentContainer.Size = UDim2.new(1, 0, 1, -35)
 contentContainer.Position = UDim2.new(0, 0, 0, 35)
 contentContainer.BackgroundTransparency = 1
 contentContainer.BorderSizePixel = 0
-contentContainer.CanvasSize = UDim2.new(0, 0, 0, 540)
+contentContainer.CanvasSize = UDim2.new(0, 0, 0, 480)
 contentContainer.ScrollBarThickness = 4
 contentContainer.Parent = frame
 
@@ -173,22 +173,6 @@ local startCorner = Instance.new("UICorner")
 startCorner.CornerRadius = UDim.new(0, 6)
 startCorner.Parent = startBtn
 
--- Export Data Button (Outputs Lua Table Code to TextBox)
-local exportBtn = Instance.new("TextButton")
-exportBtn.Name = "ExportBtn"
-exportBtn.Size = UDim2.new(0.9, 0, 0, 32)
-exportBtn.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
-exportBtn.Text = "EXPORT LUA CODE TO UI"
-exportBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-exportBtn.Font = Enum.Font.SourceSansBold
-exportBtn.TextSize = 13
-exportBtn.LayoutOrder = 3
-exportBtn.Parent = contentContainer
-
-local exportCorner = Instance.new("UICorner")
-exportCorner.CornerRadius = UDim.new(0, 5)
-exportCorner.Parent = exportBtn
-
 -- Category Buttons List
 local categories = {
 	{Key = "A", Name = "Archives"},
@@ -213,7 +197,7 @@ for order, cat in ipairs(categories) do
 	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
 	btn.Font = Enum.Font.SourceSansSemibold
 	btn.TextSize = 13
-	btn.LayoutOrder = order + 3
+	btn.LayoutOrder = order + 2
 	btn.Parent = contentContainer
 
 	btn.MouseButton1Click:Connect(function()
@@ -227,163 +211,6 @@ for order, cat in ipairs(categories) do
 		end
 	end)
 end
-
-----------------------------------------------------
--- EXPORT POPUP WINDOW
-----------------------------------------------------
-local exportFrame = Instance.new("Frame")
-exportFrame.Name = "ExportFrame"
-exportFrame.Size = UDim2.new(0, 500, 0, 400)
-exportFrame.Position = UDim2.new(0.5, -250, 0.5, -200)
-exportFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-exportFrame.BorderSizePixel = 0
-exportFrame.Visible = false
-exportFrame.Parent = screenGui
-
-local exportCornerMain = Instance.new("UICorner")
-exportCornerMain.CornerRadius = UDim.new(0, 8)
-exportCornerMain.Parent = exportFrame
-
-local exportTitle = Instance.new("TextLabel")
-exportTitle.Size = UDim2.new(1, -40, 0, 35)
-exportTitle.Position = UDim2.new(0, 10, 0, 0)
-exportTitle.BackgroundTransparency = 1
-exportTitle.Text = "Copy Full Lua Code Below (Ctrl+A, Ctrl+C)"
-exportTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
-exportTitle.Font = Enum.Font.SourceSansBold
-exportTitle.TextSize = 14
-exportTitle.TextXAlignment = Enum.TextXAlignment.Left
-exportTitle.Parent = exportFrame
-
-local closeExportBtn = Instance.new("TextButton")
-closeExportBtn.Size = UDim2.new(0, 30, 0, 30)
-closeExportBtn.Position = UDim2.new(1, -35, 0, 2)
-closeExportBtn.BackgroundColor3 = Color3.fromRGB(178, 34, 34)
-closeExportBtn.Text = "X"
-closeExportBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-closeExportBtn.Font = Enum.Font.SourceSansBold
-closeExportBtn.TextSize = 14
-closeExportBtn.Parent = exportFrame
-
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 4)
-closeCorner.Parent = closeExportBtn
-
-local dataTextBox = Instance.new("TextBox")
-dataTextBox.Size = UDim2.new(1, -20, 1, -55)
-dataTextBox.Position = UDim2.new(0, 10, 0, 40)
-dataTextBox.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
-dataTextBox.TextColor3 = Color3.fromRGB(200, 255, 200)
-dataTextBox.TextSize = 12
-dataTextBox.Font = Enum.Font.Code
-dataTextBox.MultiLine = true
-dataTextBox.ClearTextOnFocus = false
-dataTextBox.TextEditable = true
-dataTextBox.TextXAlignment = Enum.TextXAlignment.Left
-dataTextBox.TextYAlignment = Enum.TextYAlignment.Top
-dataTextBox.Parent = exportFrame
-
-local textCorner = Instance.new("UICorner")
-textCorner.CornerRadius = UDim.new(0, 6)
-textCorner.Parent = dataTextBox
-
-closeExportBtn.MouseButton1Click:Connect(function()
-	exportFrame.Visible = false
-end)
-
-local function recursiveLuaLog(instance, indent, logTable)
-	for _, child in ipairs(instance:GetChildren()) do
-		if child:IsA("BasePart") then
-			local sz = child.Size
-			local pos = child.Position
-			local rot = child.Orientation
-			local col = child.Color
-			
-			local top = tostring(child.TopSurface.Name)
-			local bottom = tostring(child.BottomSurface.Name)
-			local left = tostring(child.LeftSurface.Name)
-			local right = tostring(child.RightSurface.Name)
-			local front = tostring(child.FrontSurface.Name)
-			local back = tostring(child.BackSurface.Name)
-			
-			local meshId = ""
-			local texID = ""
-			if child:IsA("MeshPart") then
-				meshId = child.MeshId
-				texID = child.TextureID
-			else
-				local specialMesh = child:FindFirstChildOfClass("SpecialMesh")
-				if specialMesh then
-					meshId = specialMesh.MeshId
-					texID = specialMesh.TextureId
-				end
-			end
-
-			local partStr = string.format('%s{Class = "%s", Name = "%s", Size = Vector3.new(%.3f, %.3f, %.3f), Position = Vector3.new(%.3f, %.3f, %.3f), Orientation = Vector3.new(%.3f, %.3f, %.3f), Color = Color3.new(%.3f, %.3f, %.3f), TopSurface = Enum.SurfaceType.%s, BottomSurface = Enum.SurfaceType.%s, LeftSurface = Enum.SurfaceType.%s, RightSurface = Enum.SurfaceType.%s, FrontSurface = Enum.SurfaceType.%s, BackSurface = Enum.SurfaceType.%s, MeshId = "%s", TextureId = "%s"},',
-				indent, child.ClassName, child.Name, sz.X, sz.Y, sz.Z, pos.X, pos.Y, pos.Z, rot.X, rot.Y, rot.Z, col.R, col.G, col.B, top, bottom, left, right, front, back, meshId, texID)
-			table.insert(logTable, partStr)
-		elseif child:IsA("Folder") or child:IsA("Model") then
-			table.insert(logTable, string.format('%s{Folder = "%s", Class = "%s", Children = {', indent, child.Name, child.ClassName))
-			recursiveLuaLog(child, indent .. "\t", logTable)
-			table.insert(logTable, string.format('%s}},', indent))
-		end
-	end
-end
-
-exportBtn.MouseButton1Click:Connect(function()
-	local luaCode = {}
-	table.insert(luaCode, "return {")
-	
-	for _, catFolder in ipairs(ServerStorage:GetChildren()) do
-		if catFolder:IsA("Folder") then
-			table.insert(luaCode, string.format('\t["%s"] = {', catFolder.Name))
-			for _, verFolder in ipairs(catFolder:GetChildren()) do
-				if verFolder:IsA("Folder") then
-					table.insert(luaCode, string.format('\t\t["%s"] = {', verFolder.Name))
-					
-					local roomsFolder = verFolder:FindFirstChild("Rooms")
-					if roomsFolder then
-						table.insert(luaCode, '\t\t\tRooms = {')
-						for _, roomModel in ipairs(roomsFolder:GetChildren()) do
-							local pivotPos = roomModel:GetPivot().Position
-							table.insert(luaCode, string.format('\t\t\t\t{Name = "%s", PivotX = %.2f, PivotY = %.2f, PivotZ = %.2f, Parts = {', roomModel.Name, pivotPos.X, pivotPos.Y, pivotPos.Z))
-							recursiveLuaLog(roomModel, "\t\t\t\t\t", luaCode)
-							table.insert(luaCode, '\t\t\t\t}},')
-						end
-						table.insert(luaCode, '\t\t\t},')
-					end
-					
-					local propsFolder = verFolder:FindFirstChild("Props")
-					if propsFolder then
-						table.insert(luaCode, '\t\t\tProps = {')
-						recursiveLuaLog(propsFolder, "\t\t\t\t", luaCode)
-						table.insert(luaCode, '\t\t\t},')
-					end
-
-					local sideroomsFolder = verFolder:FindFirstChild("Siderooms")
-					if sideroomsFolder then
-						table.insert(luaCode, '\t\t\tSiderooms = {')
-						for _, sideModel in ipairs(sideroomsFolder:GetChildren()) do
-							local pivotPos = sideModel:GetPivot().Position
-							table.insert(luaCode, string.format('\t\t\t\t{Name = "%s", PivotX = %.2f, PivotY = %.2f, PivotZ = %.2f, Parts = {', sideModel.Name, pivotPos.X, pivotPos.Y, pivotPos.Z))
-							recursiveLuaLog(sideModel, "\t\t\t\t\t", luaCode)
-							table.insert(luaCode, '\t\t\t\t}},')
-						end
-						table.insert(luaCode, '\t\t\t},')
-					end
-					
-					table.insert(luaCode, '\t\t},')
-				end
-			end
-			table.insert(luaCode, '\t},')
-		end
-	end
-	
-	table.insert(luaCode, "}")
-	
-	dataTextBox.Text = table.concat(luaCode, "\n")
-	exportFrame.Visible = true
-end)
 
 ----------------------------------------------------
 -- DRAGGABLE LOGIC
@@ -427,7 +254,7 @@ minimizeBtn.MouseButton1Click:Connect(function()
 		minimizeBtn.Text = "+"
 	else
 		contentContainer.Visible = true
-		frame.Size = UDim2.new(0, 240, 0, 560)
+		frame.Size = UDim2.new(0, 240, 0, 500)
 		minimizeBtn.Text = "-"
 	end
 end)
